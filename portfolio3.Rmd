@@ -1,0 +1,75 @@
+---
+title: "Portfolio 3 - Tidy Tuesday TBIs"
+author: "Lindsay"
+date: "4/5"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+# Get the Data
+
+tbi_age <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_age.csv')
+tbi_year <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_year.csv')
+tbi_military <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_military.csv')
+
+# Or read in with tidytuesdayR package (https://github.com/thebioengineer/tidytuesdayR)
+# PLEASE NOTE TO USE 2020 DATA YOU NEED TO USE tidytuesdayR version ? from GitHub
+
+# Either ISO-8601 date or year/week works!
+
+# Install via devtools::install_github("thebioengineer/tidytuesdayR")
+
+tuesdata <- tidytuesdayR::tt_load('2020-03-24')
+tuesdata <- tidytuesdayR::tt_load(2020, week = 13)
+
+
+tbi_age <- tuesdata$tbi_age
+```
+plot 1 most common tbi mechanism per age group
+
+```{r}
+tbi_age %>% 
+  group_by(age_group) %>% 
+  summarize(total = sum(number_est, na.rm = TRUE),
+            rate = round(mean(rate_est, na.rm = TRUE), 2))
+```
+
+```{r}
+tbi_age %>% 
+  group_by(age_group) %>% 
+  summarize(rate = round(mean(rate_est, na.rm = TRUE), 2)) %>% 
+  mutate(age_group = fct_reorder(age_group, rate)) %>% 
+  ggplot(aes(age_group, rate, fill = age_group)) + 
+  geom_col(show.legend = FALSE) +
+  labs(title = "TBI incident rate by age",
+       x = NULL,
+       y = "TBI incident rate (per 100k)")
+```
+
+
+```{r}
+tbi_age %>% 
+  group_by(injury_mechanism) %>% 
+  summarize(total = sum(number_est, na.rm = TRUE))
+```
+
+```{r}
+tbi_age %>% 
+  group_by(age_group, injury_mechanism) %>% 
+  ggplot(aes(age_group, rate_est, fill = injury_mechanism)) + 
+   geom_col(position = "dodge") +
+  labs(title = "TBI incident rate by age", 
+       x = NULL,
+       y = "TBI incident rate (per 100k)")
+```
+
+
